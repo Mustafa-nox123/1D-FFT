@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <math.h>
+#include <complex.h>
+
+void butterfly_operation(double complex *x_even, double complex *x_odd, int N, int k) {
+    // Twiddle factor calculation
+    double complex twiddle_factor = cexp(-I * 2 * M_PI * k / N);  // W_N^k
+    
+    // Perform butterfly operation
+    double complex sum = x_even[k] + twiddle_factor * x_odd[k];
+    double complex diff = x_even[k] - twiddle_factor * x_odd[k];
+    
+    // Store the result back
+    x_even[k] = sum;
+    x_odd[k] = diff;
+}
+
+int main() {
+    // Initialize even and odd parts of the signal as complex numbers
+    double complex x_even[] = {1.0 + 2.0*I, 3.0 + 4.0*I, 5.0 + 6.0*I, 7.0 + 8.0*I};
+    double complex x_odd[] = {2.0 + 3.0*I, 4.0 + 5.0*I, 6.0 + 7.0*I, 8.0 + 9.0*I};
+    int N = 4; // Size of the signal
+
+    // Print the original values
+    printf("Before butterfly operation:\n");
+    for (int i = 0; i < N; i++) {
+        printf("Even[%d] = %.2f + %.2fi\n", i, creal(x_even[i]), cimag(x_even[i]));
+        printf("Odd[%d] = %.2f + %.2fi\n", i, creal(x_odd[i]), cimag(x_odd[i]));
+    }
+
+    // Perform the butterfly operation for the first index (k = 0)
+    butterfly_operation(x_even, x_odd, N, 0);
+
+    // Print the values after the butterfly operation
+    printf("\nAfter butterfly operation:\n");
+    for (int i = 0; i < N; i++) {
+        printf("Even[%d] = %.2f + %.2fi\n", i, creal(x_even[i]), cimag(x_even[i]));
+        printf("Odd[%d] = %.2f + %.2fi\n", i, creal(x_odd[i]), cimag(x_odd[i]));
+    }
+
+    return 0;
+}
