@@ -1,0 +1,458 @@
+#code 2
+# ---------------------------
+# 1D FFT in RISC-V Assembly
+# N=1024 (input size)
+# Complete bit reversal + twiddle factors + iterative FFT
+# Floating-point single precision
+# ---------------------------
+
+    .section .data
+    .align 2
+
+# Input data: linear sequence 0,1,2,...1023 for real part, zeros for imag
+N:      .word 1024                  # FFT size
+
+real:   
+    .rept 1024
+    .float 0.0 + . -1    # We'll init in code to 0.0,1.0,2.0,... in data section this is placeholder
+    .endr
+
+imag:
+    .rept 1024
+    .float 0.0
+    .endr
+
+# Temporary arrays for bit reversal step
+real_temp:
+    .rept 1024
+    .float 0.0
+    .endr
+
+imag_temp:
+    .rept 1024
+    .float 0.0
+    .endr
+
+# Arrays for twiddle factors (cosine and sine)
+W_real:
+    .rept 512
+    .float 0.0
+    .endr
+
+W_imag:
+    .rept 512
+    .float 0.0
+    .endr
+
+logsize: .word 0                    # To store log2(N)
+
+# Constants for sin_cos_approx (you can prefill these or load in code)
+half_pi_hi:    .float 1.57079637e+0
+half_pi_lo:    .float -4.37113883e-8
+const_2_pi:    .float 6.36619747e-1
+const_12582912: .float 12582912.0
+cos_coeff_0:   .float 2.44677067e-5
+cos_coeff_1:   .float -1.38877297e-3
+cos_coeff_2:   .float 4.16666567e-2
+cos_coeff_3:   .float -5.00000000e-1
+cos_coeff_4:   .float 1.00000000e+0
+sin_coeff_0:   .float 2.86567956e-6
+sin_coeff_1:   .float -1.98559923e-4
+sin_coeff_2:   .float 8.33338592e-3
+sin_coeff_3:   .float -1.66666672e-1
+
+    .section .text
+    .globl _start
+_start:
+    # Initialize real array with 0.0,1.0,2.0,...,1023.0
+    la a0, real
+    li t0, 0
+
+init_real_loop:
+    bge t0, 1024, init_done
+    fcvt.s.w fa0, t0          # Convert integer to float
+    fsw fa0, 0(a0)
+    addi a0, a0, 4
+    addi t0, t0, 1
+    j init_real_loop
+
+init_done:
+    # Initialize imaginary to 0.0 (already zero in data section but safe)
+    la a0, imag
+    li t0, 0
+init_imag_loop:
+    bge t0, 1024, init_imag_done
+    fmv.s fa0, zero           # zero float register
+    fsw fa0, 0(a0)
+    addi a0, a0, 4
+    addi t0, t0, 1
+    j init_imag_loop
+init_imag_done:
+
+    # Load N into a2
+    lw a2, N
+
+    # Calculate log2(N) and save to logsize
+    mv a0, a2
+    call setlogN
+
+    # Bit reversal reorder
+    la a0, real
+    la a1, imag
+    mv a2, a2
+    call ordina
+
+    # Generate twiddle factors
+    la a0, W_real
+    la a1, W_imag
+    mv a2, a2
+    li a3, 1       # inverse flag = 1 means forward FFT
+    call preload_constants
+    call generate_twiddles
+
+    # Perform FFT
+    la a0, real
+    la a1, imag
+    lw a2, N
+    li a3, 1       # forward FFT flag
+    call transform
+
+    # Print output (real and imag)
+    la a0, real
+    la a1, imag
+    lw a2, N
+    call print
+
+    # Finish program
+    j _finish
+
+
+# --- Functions below ---
+
+
+# setlogN: calculate floor(log2(N)) from a0 and store to logsize memory
+setlogN:
+    clz t0, a0             # count leading zeros
+    li t1, 31
+    sub t1, t1, t0         # log2(N)
+    la t0, logsize
+    sw t1, 0(t0)
+    jr ra
+
+
+# ordina: Bit reversal reorder of real[] and imag[]
+# Inputs: a0=real base, a1=imag base, a2=N
+ordina:
+    addi sp, sp, -24
+    sw ra, 0(sp)
+    sw a0, 4(sp)
+    sw a1, 8(sp)
+    sw a2, 12(sp)
+    la t4, real_temp
+    la t5, imag_temp
+    mv a3, a0
+    mv a4, a1
+    lw a1, logsize
+
+    li t3, 0
+ordina_loop:
+    bge t3, a2, ordina_done
+    mv a0, t3
+    mv a1, a1         # bits to reverse
+    call reverse
+    slli t2, a0, 2
+    add t0, a3, t2
+    add t1, a4, t2
+
+    flw ft0, 0(t0)
+    flw ft1, 0(t1)
+
+    fsw ft0, 0(t4)
+    fsw ft1, 0(t5)
+
+    addi t4, t4, 4
+    addi t5, t5, 4
+
+    addi t3, t3, 1
+    j ordina_loop
+ordina_done:
+
+    la t4, real_temp
+    la t5, imag_temp
+
+    addi t0, zero, 0
+ordina_copy_loop:
+    bge t0, a2, ordina_copy_done
+
+    flw ft0, 0(t4)
+    flw ft1, 0(t5)
+
+    fsw ft0, 0(a3)
+    fsw ft1, 0(a4)
+
+    addi t4, t4, 4
+    addi t5, t5, 4
+    addi a3, a3, 4
+    addi a4, a4, 4
+
+    addi t0, t0, 1
+    j ordina_copy_loop
+ordina_copy_done:
+
+    lw ra, 0(sp)
+    lw a0, 4(sp)
+    lw a1, 8(sp)
+    lw a2, 12(sp)
+    addi sp, sp, 24
+    jr ra
+
+
+# reverse: bit reverse a0 with a1 bits (assumes 32-bit input)
+reverse:
+    li t0, 0x55555555
+    srli t1, a0, 1
+    and t1, t1, t0
+    and t2, a0, t0
+    slli t2, t2, 1
+    or a0, t1, t2
+
+    li t0, 0x33333333
+    srli t1, a0, 2
+    and t1, t1, t0
+    and t2, a0, t0
+    slli t2, t2, 2
+    or a0, t1, t2
+
+    li t0, 0x0F0F0F0F
+    srli t1, a0, 4
+    and t1, t1, t0
+    and t2, a0, t0
+    slli t2, t2, 4
+    or a0, t1, t2
+
+    li t0, 0x00FF00FF
+    srli t1, a0, 8
+    and t1, t1, t0
+    and t2, a0, t0
+    slli t2, t2, 8
+    or a0, t1, t2
+
+    srli t1, a0, 16
+    slli t2, a0, 16
+    or a0, t1, t2
+
+    li t1, 32
+    sub t1, t1, a1
+    srl a0, a0, t1
+
+    ret
+
+
+# preload_constants: loads constants for sin_cos_approx
+preload_constants:
+    la t0, half_pi_hi
+    flw fs0, 0(t0)
+    flw fs1, 4(t0)
+    flw fs2, 8(t0)
+    flw fs3, 12(t0)
+    flw fs4, 16(t0)
+    flw fs5, 20(t0)
+    flw fs6, 24(t0)
+    flw fs7, 28(t0)
+    flw fs8, 32(t0)
+    flw fs9, 36(t0)
+    flw fs10, 40(t0)
+    flw fs11, 44(t0)
+    flw ft11, 48(t0)
+    ret
+
+# sin_cos_approx: chebyshev polynomial approx for sin, cos
+sin_cos_approx:
+    fmadd.s ft0, fa0, fs2, fs3
+    fsub.s ft0, ft0, fs3
+    fnmsub.s ft1, ft0, fs0, fa0
+    fnmsub.s ft1, ft0, fs1, ft1
+    fcvt.w.s t0, ft0
+    addi t1, t0, 1
+    fmul.s ft2, ft1, ft1
+    fmadd.s fa0, fs4, ft2, fs5
+    fmadd.s fa0, fa0, ft2, fs6
+    fmadd.s fa0, fa0, ft2, fs7
+    fmadd.s fa0, fa0, ft2, fs8
+    fmadd.s fa1, fs9, ft2, fs10
+    fmadd.s fa1, fa1, ft2, fs11
+    fmadd.s fa1, fa1, ft2, ft11
+    fmul.s ft3, ft1, ft2
+    fmadd.s fa1, fa1, ft3, ft1
+    andi t2, t0, 1
+    beqz t2, sincos_swap
+    fmv.s ft0, fa0
+    fmv.s fa0, fa1
+    fmv.s fa1, ft0
+sincos_swap:
+    andi t0, t0, 2
+    beqz t0, sincos_sign1
+    fneg.s fa0, fa0
+sincos_sign1:
+    andi t1, t1, 2
+    beqz t1, sincos_sign2
+    fneg.s fa1, fa1
+sincos_sign2:
+    ret
+
+
+# generate_twiddles: calculate W_real, W_imag for FFT
+# Inputs: a0=base W_real, a1=base W_imag, a2=N
+generate_twiddles:
+    addi sp, sp, -12
+    sw ra, 0(sp)
+    sw a0, 4(sp)
+    sw a1, 8(sp)
+
+    mv s0, a0
+    mv s1, a1
+    mv s2, a2
+
+    # load constants for sin_cos_approx
+    call preload_constants
+
+    li t0, 0       # loop i = 0
+    srli t1, s2, 1 # N/2
+
+twiddle_loop:
+    bge t0, t1, twiddle_done
+
+    # angle = -2pi * i / N (for FFT)
+    la t2, NEG_TWO_PI
+    flw ft0, 0(t2)
+    fcvt.s.w fa0, t0
+    fcvt.s.w fa1, s2
+    fdiv.s fa2, fa0, fa1       # i/N
+    fmul.s fa0, ft0, fa2       # angle = -2pi * i/N
+
+    # call sin_cos_approx with fa0 = angle
+    call sin_cos_approx
+
+    # store cos in W_real[i], sin in W_imag[i]
+    fsw fa1, 0(s0)
+    fsw fa0, 0(s1)
+
+    addi s0, s0, 4
+    addi s1, s1, 4
+    addi t0, t0, 1
+    j twiddle_loop
+
+twiddle_done:
+    lw ra, 0(sp)
+    lw a0, 4(sp)
+    lw a1, 8(sp)
+    addi sp, sp, 12
+    ret
+
+
+# transform: iterative FFT butterfly stages
+# Inputs: a0=real base, a1=imag base, a2=N, a3=inverse_flag (1=FFT)
+transform:
+    addi sp, sp, -4
+    sw ra, 0(sp)
+
+    la s0, W_real
+    la s1, W_imag
+    lw s4, logsize
+
+    li t5, 1       # n = 1
+    srli t6, a2, 1 # a = N/2
+
+    li t0, 0       # stage counter j = 0
+
+transform_loop_j:
+    bge t0, s4, transform_done
+
+    mul a3, t5, t6  # stride = n*a
+
+    li t1, 0        # i
+
+transform_loop_i:
+    bge t1, a2, transform_loop_i_end
+
+    and t2, t1, t5
+    bne t2, zero, transform_loop_i_skip
+
+    slli t3, t1, 2
+    add a4, a0, t3
+    add a5, a1, t3
+
+    mul t3, t1, t6
+    rem t3, t3, a3
+    slli t3, t3, 2
+    add t4, s0, t3
+    add t3, s1, t3
+
+    flw ft0, 0(a4)
+    flw ft1, 0(a5)
+    flw ft2, 0(t4)
+    flw ft3, 0(t3)
+
+    add t4, t1, t5
+    slli t4, t4, 2
+    add a6, a0, t4
+    add a7, a1, t4
+
+    flw ft4, 0(a6)
+    flw ft5, 0(a7)
+
+    # complex multiply: odd * W
+    fmul.s ft6, ft3, ft5
+    fmsub.s ft6, ft2, ft4, ft6
+    fmul.s ft7, ft3, ft4
+    fmadd.s ft7, ft2, ft5, ft7
+
+    # update even values
+    fadd.s ft8, ft0, ft6
+    fadd.s ft9, ft1, ft7
+
+    # update odd values
+    fsub.s ft10, ft0, ft6
+    fsub.s ft11, ft1, ft7
+
+    fsw ft8, 0(a4)
+    fsw ft9, 0(a5)
+    fsw ft10, 0(a6)
+    fsw ft11, 0(a7)
+
+transform_loop_i_skip:
+    addi t1, t1, 1
+    j transform_loop_i
+transform_loop_i_end:
+
+    slli t5, t5, 1
+    srli t6, t6, 1
+    addi t0, t0, 1
+    j transform_loop_j
+transform_done:
+    lw ra, 0(sp)
+    addi sp, sp, 4
+    ret
+
+# print: prints real and imag arrays in simulator (loop, no actual print syscall)
+# Inputs: a0=real base, a1=imag base, a2=N
+print:
+    li t0, 0
+print_loop:
+    bge t0, a2, print_done
+    flw ft0, 0(a0)
+    flw ft1, 0(a1)
+    # Values loaded in ft0, ft1 can be inspected in simulator registers
+    addi a0, a0, 4
+    addi a1, a1, 4
+    addi t0, t0, 1
+    j print_loop
+print_done:
+    jr ra
+
+# _finish: simulator exit
+_finish:
+    li x3, 0xd0580000
+    addi x5, x0, 0xff
+    sb x5, 0(x3)
+    beq x0, x0, _finish
