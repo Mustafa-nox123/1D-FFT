@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <math.h>
+
+void bit_reversal(int *arr, int N) {
+    int num_bits = log2(N);  // N ke liye kitni bits chahiye
+    
+    // Har index par loop chalana
+    for (int i = 0; i < N; i++) {
+        int reversed_index = 0;
+        
+        // i ko binary mein reverse karna
+        for (int j = 0; j < num_bits; j++) {
+            if (i & (1 << j)) {
+                reversed_index |= (1 << (num_bits - 1 - j));
+            }
+        }
+        
+        // Swap elements at index i and reversed_index
+        if (i < reversed_index) {
+            int temp = arr[i];
+            arr[i] = arr[reversed_index];
+            arr[reversed_index] = temp;
+        }
+    }
+}
+
+int main() {
+    int x[8] = {1, 2, 3, 4, 5, 6, 7, 8};  // Example array with 8 elements
+    int N = 8;
+    
+    printf("Original array: ");
+    for (int i = 0; i < N; i++) {
+        printf("%d ", x[i]);
+    }
+    printf("\n");
+
+    // Apply bit-reversal
+    bit_reversal(x, N);
+
+    printf("After bit reversal: ");
+    for (int i = 0; i < N; i++) {
+        printf("%d ", x[i]);
+    }
+    printf("\n");
+    
+    return 0;
+}
