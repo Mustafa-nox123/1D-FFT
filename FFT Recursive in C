@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <math.h>
+#include <complex.h>
+#include <stdlib.h>
+
+// Check for invalid values (NaN or Inf)
+void check_valid(double complex num) {
+    if (isnan(creal(num)) || isnan(cimag(num)) || isinf(creal(num)) || isinf(cimag(num))) {
+        printf("Invalid value detected: %.2f + %.2fi\n", creal(num), cimag(num));
+    }
+}
+
+// Bit-reversal permutation function
+void bit_reversal(double complex *arr, int N) {
+    int num_bits = log2(N);
+    for (int i = 0; i < N; i++) {
+        int reversed_index = 0;
+        for (int j = 0; j < num_bits; j++) {
+            if (i & (1 << j)) {
+                reversed_index |= (1 << (num_bits - 1 - j));
+            }
+        }
+        if (i < reversed_index) {
+            double complex temp = arr[i];
+            arr[i] = arr[reversed_index];
+            arr[reversed_index] = temp;
+        }
+    }
+}
+
+// Butterfly operation
+void butterfly_operation(double complex *x_even, double complex *x_odd, int N, int k) {
+    double complex twiddle_factor = cexp(-I * 2 * M_PI * k / N);  // W_N^k
+    double complex sum = x_even[k] + twiddle_factor * x_odd[k];
+    double complex diff = x_even[k] - twiddle_factor * x_odd[k];
+    
+    x_even[k] = sum;
+    x_odd[k] = diff;
+}
+
+// Recursive FFT with dynamic memory allocation
+void fft(double complex *arr, int N) {
+    // Base case: If N is 1, return
+    if (N <= 1) return;
+
+    // Dynamically allocate memory for even and odd arrays
+    double complex *even = (double complex *)malloc(N / 2 * sizeof(double complex));
+    double complex *odd = (double complex *)malloc(N / 2 * sizeof(double complex));
+    
+    // Fill the even and odd arrays
+    for (int i = 0; i < N / 2; i++) {
+        even[i] = arr[2*i];       // Even indexed
+        odd[i] = arr[2*i + 1];    // Odd indexed
+    }
+
+    // Recursively apply FFT to the even and odd parts
+    fft(even, N / 2);
+    fft(odd, N / 2);
+
+    // Combine the results using the butterfly operation
+    for (int k = 0; k < N / 2; k++) {
+        double complex twiddle_factor = cexp(-I * 2 * M_PI * k / N);
+        arr[k] = even[k] + twiddle_factor * odd[k];         // Upper half of the FFT
+        arr[k + N / 2] = even[k] - twiddle_factor * odd[k]; // Lower half of the FFT
+
+        // Check for invalid values after each FFT stage
+        check_valid(arr[k]);
+        check_valid(arr[k + N / 2]);
+    }
+
+    // Scaling the output to avoid overflow for large inputs
+    for (int i = 0; i < N; i++) {
+        arr[i] /= N;
+    }
+
+    // Free dynamically allocated memory
+    free(even);
+    free(odd);
+}
+
+int main() {
+    int N = 16;  // You can test for other values like N = 8, N = 32 as well
+    double complex x[] = {1.0 + 2.0*I, 3.0 + 4.0*I, 5.0 + 6.0*I, 7.0 + 8.0*I,
+                          9.0 + 10.0*I, 11.0 + 12.0*I, 13.0 + 14.0*I, 15.0 + 16.0*I,
+                          17.0 + 18.0*I, 19.0 + 20.0*I, 21.0 + 22.0*I, 23.0 + 24.0*I,
+                          25.0 + 26.0*I, 27.0 + 28.0*I, 29.0 + 30.0*I, 31.0 + 32.0*I};
+
+    // Original array display
+    printf("Original array: \n");
+    for (int i = 0; i < N; i++) {
+        printf("x[%d] = %.2f + %.2fi\n", i, creal(x[i]), cimag(x[i]));
+    }
+
+    // Apply bit-reversal
+    bit_reversal(x, N);
+
+    printf("\nAfter bit-reversal: \n");
+    for (int i = 0; i < N; i++) {
+        printf("x[%d] = %.2f + %.2fi\n", i, creal(x[i]), cimag(x[i]));
+    }
+
+    // Apply recursive FFT
+    fft(x, N);
+
+    printf("\nAfter FFT: \n");
+    for (int i = 0; i < N; i++) {
+        printf("x[%d] = %.2f + %.2fi\n", i, creal(x[i]), cimag(x[i]));
+    }
+
+    return 0;
+}
