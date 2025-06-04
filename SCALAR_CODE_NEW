@@ -1,0 +1,541 @@
+  #  .section .data
+ #       .set dataSize, 1024
+  #  .set halfDataSize, dataSize/2
+
+# W_real array of 512 zeros (for N=1024)
+W_real:
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+
+    W_imag:
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    .float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    
+N:      .word 1024         # FFT size (power of 2)
+logsize: .word 0           # Will store log2(N)
+
+#    .section .text
+    .globl _start
+_start:
+    # Load N into register a0
+    lw a0, N
+
+    # Call setlogN function to compute log2(N)
+    call setlogN
+
+    # After call, logsize memory contains log2(N)
+    # For demo, infinite loop to allow checking memory in debugger
+    j _end
+
+# Function: setlogN
+# Calculates log2(N) using clz instruction
+# Input: a0 = N
+# Output: stores log2(N) at label 'logsize'
+setlogN:
+    clz t0, a0               # Count leading zeros of N
+    li t1, 31
+    sub t1, t1, t0           # log2(N) = 31 - clz(N)
+    la t0, logsize           # Load address of logsize
+    sw t1, 0(t0)             # Store log2(N) to memory
+    jr ra                    # Return
+
+_end:
+    j _end                   # Infinite loop to halt
+
+
+# Inputs:
+#   a0 = input number to reverse bits of
+#   a1 = number of bits to reverse (e.g., 10 for N=1024)
+# Output:
+#   a0 = bit-reversed number (only lower a1 bits reversed)
+# Clobbers: t0-t3
+
+reverse:
+    li t0, 0          # reversed = 0
+    li t1, 0          # counter i = 0
+
+reverse_loop:
+    beq t1, a1, reverse_done   # if i == number_of_bits done
+
+    slli t0, t0, 1             # reversed <<= 1
+
+    and t2, a0, 1              # Extract lowest bit of a0
+    or t0, t0, t2              # Add bit to reversed
+
+    srli a0, a0, 1             # Shift input right by 1
+    addi t1, t1, 1             # i++
+
+    j reverse_loop
+
+reverse_done:
+    mv a0, t0                  # Move reversed into a0
+    jr ra                      # Return
+
+
+# Inputs:
+#   a0 = base address of real[] array (float)
+#   a1 = base address of imag[] array (float)
+#   a2 = size of arrays (N)
+# Uses:
+#   logsize (memory) stores log2(N)
+# Temporaries: real_temp[], imag_temp[] arrays allocated in .data section
+
+ordina:
+    addi sp, sp, -24
+    sw ra, 0(sp)
+    sw a0, 4(sp)
+    sw a1, 8(sp)
+    sw a2, 12(sp)
+    lw t0, logsize          # load log2(N)
+    
+    # Load temp array addresses
+    la t1, real_temp
+    la t2, imag_temp
+
+    li t3, 0                # index i = 0
+
+ordina_loop1:
+    bge t3, a2, ordina_loop1_done
+
+    mv a0, t3               # argument for reverse
+    mv a1, t0               # bits to reverse
+    call reverse            # returns reversed index in a0
+
+    # Calculate addresses to load from real[] and imag[] at reversed index
+    slli t4, a0, 2          # offset = reversed_index * 4 (float size)
+    add t5, a0, zero        # save reversed index for clarity (not necessary)
+    
+    add t6, a0, zero        # placeholder for clarity (not necessary)
+
+    # Load real[reversed_index] and imag[reversed_index]
+    add t7, a0, zero
+
+    # Actually calculate addresses for reversed index in original arrays:
+    slli t4, a0, 2          # reversed_index * 4 bytes
+    add t8, a0, zero        # redundant but keeps clarity
+    add t9, a1, zero        # redundant but keeps clarity
+    
+    add t4, a0, zero        # fixing above, better do this properly:
+
+    # Correct calculation:
+    slli t4, a0, 2           # reversed_index * 4 bytes offset
+    add t5, a0, zero         # just a placeholder, can be removed
+    
+    # Load from original real and imag arrays:
+    add t6, a0, zero         # placeholder, remove
+    # Fix:
+
+    # Load real[reversed_index]
+    la t6, real
+    add t6, t6, t4
+    flw ft0, 0(t6)
+
+    # Load imag[reversed_index]
+    la t7, imag
+    add t7, t7, t4
+    flw ft1, 0(t7)
+
+    # Store to temp arrays at index i
+    slli t8, t3, 2           # i * 4 bytes
+    add t9, t1, t8           # real_temp + offset
+    fsw ft0, 0(t9)
+
+    add t9, t2, t8           # imag_temp + offset
+    fsw ft1, 0(t9)
+
+    addi t3, t3, 1
+    j ordina_loop1
+
+ordina_loop1_done:
+
+    # Copy back temp arrays to original real[] and imag[]
+    li t3, 0
+
+ordina_loop2:
+    bge t3, a2, ordina_done
+
+    slli t4, t3, 2           # offset = i*4 bytes
+
+    # Load from real_temp and store back to real[]
+    add t5, t1, t4
+    flw ft0, 0(t5)
+    la t6, real
+    add t6, t6, t4
+    fsw ft0, 0(t6)
+
+    # Load from imag_temp and store back to imag[]
+    add t5, t2, t4
+    flw ft1, 0(t5)
+    la t7, imag
+    add t7, t7, t4
+    fsw ft1, 0(t7)
+
+    addi t3, t3, 1
+    j ordina_loop2
+
+ordina_done:
+    lw ra, 0(sp)
+    lw a0, 4(sp)
+    lw a1, 8(sp)
+    lw a2, 12(sp)
+    addi sp, sp, 24
+    jr ra
+
+# Loads constants for sine/cosine polynomial approximation into floating registers fs0-fs11 and ft11.
+
+preload_constants:
+    la t0, half_pi_hi          # Base address of constants block
+
+    flw fs0, 0(t0)             # half_pi_hi
+    flw fs1, 4(t0)             # half_pi_lo
+    flw fs2, 8(t0)             # const_2_pi
+    flw fs3, 12(t0)            # const_12582912
+
+    flw fs4, 16(t0)            # cos coeff 0
+    flw fs5, 20(t0)            # cos coeff 1
+    flw fs6, 24(t0)            # cos coeff 2
+    flw fs7, 28(t0)            # cos coeff 3
+    flw fs8, 32(t0)            # cos coeff 4
+
+    flw fs9, 36(t0)            # sin coeff 0
+    flw fs10, 40(t0)           # sin coeff 1
+    flw fs11, 44(t0)           # sin coeff 2
+    flw ft11, 48(t0)           # sin coeff 3
+
+    ret
+
+sin_cos_approx:
+    fmadd.s ft0, fa0, fs2, fs3          # j = fa0 * const_2_pi + const_12582912
+    fsub.s ft0, ft0, fs3                # j -= const_12582912
+
+    fnmsub.s ft1, ft0, fs0, fa0         # a = fa0 - j*half_pi_hi
+    fnmsub.s ft1, ft0, fs1, ft1         # a -= j*half_pi_lo
+
+    fcvt.w.s t0, ft0                    # i = (int)j
+    addi t1, t0, 1                     # ic = i + 1
+
+    fmul.s ft2, ft1, ft1                # sa = a*a
+
+    # Cosine polynomial approximation
+    fmadd.s fa0, fs4, ft2, fs5          # fa0 = cos_coeff0 * sa + cos_coeff1
+    fmadd.s fa0, fa0, ft2, fs6           # fa0 = fa0 * sa + cos_coeff2
+    fmadd.s fa0, fa0, ft2, fs7           # fa0 = fa0 * sa + cos_coeff3
+    fmadd.s fa0, fa0, ft2, fs8           # fa0 = fa0 * sa + cos_coeff4
+
+    # Sine polynomial approximation
+    fmadd.s fa1, fs9, ft2, fs10          # fa1 = sin_coeff0 * sa + sin_coeff1
+    fmadd.s fa1, fa1, ft2, fs11          # fa1 = fa1 * sa + sin_coeff2
+    fmadd.s fa1, fa1, ft2, ft11          # fa1 = fa1 * sa + sin_coeff3
+    fmul.s ft3, ft1, ft2                 # t = a * sa
+    fmadd.s fa1, fa1, ft3, ft1           # fa1 = fa1 * t + a
+
+    andi t2, t0, 1                      # check i & 1
+    beqz t2, ifsincos
+
+    # Swap sine and cosine if needed
+    fmv.s ft0, fa0
+    fmv.s fa0, fa1
+    fmv.s fa1, ft0
+
+ifsincos:
+    andi t0, t0, 2
+    beqz t0, sign1done
+
+    fneg.s fa0, fa0                    # negate sine if bit set
+
+sign1done:
+    andi t1, t1, 2
+    beqz t1, sign2done
+
+    fneg.s fa1, fa1                    # negate cosine if bit set
+
+sign2done:
+    ret
+
+# Inputs:
+#   a0 = base addr of real[]
+#   a1 = base addr of imag[]
+#   a2 = N (size, e.g., 1024)
+#   a3 = direction (1 for FFT, -1 for IFFT)
+#
+# Uses:
+#   logsize in memory (log2(N))
+#   W_real and W_imag arrays in .data
+#   Calls preload_constants and sin_cos_approx
+
+transform:
+    addi sp, sp, -8
+    sw ra, 0(sp)
+
+    call ordina         # reorder inputs by bit-reversal
+
+    call preload_constants
+
+    # Calculate -2 * PI * direction / N into ft4
+    mul t0, a2, a3       # t0 = N * direction
+    fcvt.s.w ft0, t0
+    la t1, NEG_TWO_PI
+    flw ft4, 0(t1)
+    fdiv.s ft4, ft4, ft0    # ft4 = (direction * -2 * PI) / N
+
+    # Generate twiddle factors (for k = 0 to N/2 - 1)
+    la s0, W_real
+    la s1, W_imag
+    li t2, 0
+    srli t3, a2, 1         # N/2
+
+twiddle_loop:
+    bge t2, t3, twiddle_done
+
+    fcvt.s.w fa0, t2        # convert index k to float
+    fmul.s fa0, ft4, fa0    # angle = ft4 * k
+
+    call sin_cos_approx     # returns sin in fa0, cos in fa1
+
+    fsw fa1, 0(s0)          # store cosine in W_real[k]
+    fsw fa0, 0(s1)          # store sine in W_imag[k]
+
+    addi s0, s0, 4
+    addi s1, s1, 4
+    addi t2, t2, 1
+    j twiddle_loop
+
+twiddle_done:
+
+    # FFT butterfly computation:
+    # Outer loop over stages j = 0 to log2(N)-1
+    lw s4, logsize          # log2(N)
+    li t5, 1                # n = 1
+    srli t6, a2, 1          # a = N/2
+
+    li t0, 0                # stage counter j=0
+
+stage_loop:
+    bge t0, s4, stage_done
+
+    mul a3, t5, t6          # stride = n * a
+
+    li t1, 0                # i = 0
+
+inner_loop_i:
+    bge t1, a2, next_stage
+
+    and t2, t1, t5          # i & n
+    bne t2, zero, skip_i    # if (i & n) != 0, skip
+
+    # Calculate addresses and load data
+    slli t3, t1, 2
+    add t4, a0, t3          # real[i]
+    add t7, a1, t3          # imag[i]
+
+    flw ft0, 0(t4)
+    flw ft1, 0(t7)
+
+    # k = (i * a) % stride
+    mul t3, t1, t6
+    rem t3, t3, a3
+    slli t3, t3, 2
+
+    la s0, W_real
+    la s1, W_imag
+    add t8, s0, t3
+    add t9, s1, t3
+
+    flw ft2, 0(t8)          # twiddle real
+    flw ft3, 0(t9)          # twiddle imag
+
+    # Load real[i+n] and imag[i+n]
+    add t3, t1, t5
+    slli t3, t3, 2
+    add t10, a0, t3
+    add t11, a1, t3
+
+    flw ft4, 0(t10)
+    flw ft5, 0(t11)
+
+    # Complex multiplication: odd * W
+    # real_odd * w_real - imag_odd * w_imag
+    fmul.s ft6, ft4, ft2
+    fmul.s ft7, ft5, ft3
+    fsub.s ft6, ft6, ft7
+
+    # real_odd * w_imag + imag_odd * w_real
+    fmul.s ft8, ft4, ft3
+    fmul.s ft9, ft5, ft2
+    fadd.s ft7, ft8, ft9
+
+    # Butterfly outputs
+    fadd.s ft8, ft0, ft6
+    fadd.s ft9, ft1, ft7
+    fsub.s ft10, ft0, ft6
+    fsub.s ft11, ft1, ft7
+
+    # Store results back
+    fsw ft8, 0(t4)
+    fsw ft9, 0(t7)
+    fsw ft10, 0(t10)
+    fsw ft11, 0(t11)
+
+skip_i:
+    addi t1, t1, 1
+    j inner_loop_i
+
+next_stage:
+    slli t5, t5, 1      # n *= 2
+    srli t6, t6, 1      # a /= 2
+    addi t0, t0, 1
+    j stage_loop
+
+stage_done:
+    lw ra, 0(sp)
+    addi sp, sp, 8
+    jr ra
+ 
+ # Inputs:
+#   a0 = base addr real[]
+#   a1 = base addr imag[]
+#   a2 = N (size)
+# Output:
+#   Scales real[] and imag[] by dividing each element by N after IFFT
+
+IFFT:
+    addi sp, sp, -12
+    sw ra, 0(sp)
+
+    li t0, 0                 # index i = 0
+    fcvt.s.w ft2, a2        # convert N to float for division
+
+ifft_loop:
+    bge t0, a2, ifft_done
+
+    flw ft0, 0(a0)          # real[i]
+    flw ft1, 0(a1)          # imag[i]
+
+    fdiv.s ft0, ft0, ft2    # real[i] /= N
+    fdiv.s ft1, ft1, ft2    # imag[i] /= N
+
+    fsw ft0, 0(a0)
+    fsw ft1, 0(a1)
+
+    addi a0, a0, 4
+    addi a1, a1, 4
+    addi t0, t0, 1
+    j ifft_loop
+
+ifft_done:
+    lw ra, 0(sp)
+    addi sp, sp, 12
+    jr ra
+
+# Inputs:
+#   a0 = base addr real[]
+#   a1 = base addr imag[]
+#   a2 = N (size)
+print:
+    li t0, 0               # index i = 0
+    mv t1, a0              # pointer to real[]
+    mv t2, a1              # pointer to imag[]
+
+print_loop:
+    bge t0, a2, print_done
+
+    flw ft0, 0(t1)         # load real[i]
+    flw ft1, 0(t2)         # load imag[i]
+
+    # For real hardware, replace these with ecall or write to memory/IO
+    # For now, just dummy placeholders to keep registers alive
+    nop
+    nop
+
+    addi t1, t1, 4
+    addi t2, t2, 4
+    addi t0, t0, 1
+    j print_loop
+
+print_done:
+    jr ra
